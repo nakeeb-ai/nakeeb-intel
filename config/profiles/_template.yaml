@@ -1,0 +1,46 @@
+# Nakeeb AI - Profile Template
+# Copy to config/profiles/<new-domain>.yaml and customize
+
+id: <domain-id>
+name: "<Domain Name>"
+description: "<One-line description of domain scope>"
+
+# Source filtering
+sources:
+  include: []  # List of source IDs from config/sources.yaml
+  exclude: []
+
+# Keywords for relevance matching
+keywords:
+  required_any: []  # At least one must match
+  negative: []      # Exclude if any matches
+
+# Scoring weights (multipliers on base 100-point rubric)
+scoring_weights:
+  practical_usefulness: 1.0
+  technical_quality: 1.0
+  free_access: 1.0
+  documentation: 1.0
+  maintenance: 1.0
+  integration_potential: 1.0
+  originality: 1.0
+
+# Minimum thresholds
+thresholds:
+  min_score: 65
+  reverse_engineering_threshold: 80
+  min_stars: 0
+  min_forks: 0
+  max_age_days: 730
+
+# License preferences
+license:
+  preferred: []
+  acceptable: []
+  reject: []
+
+# Free-tier compatibility
+free_tier:
+  required: true
+  acceptable_patterns: []
+  reject_patterns: []

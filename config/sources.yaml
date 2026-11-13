@@ -1,0 +1,189 @@
+# Nakeeb AI - Source Configuration
+# All sources verified free and accessible (Phase 0 audit)
+
+version: 1
+collection_window_hours: 24
+
+sources:
+  # === GITHUB ===
+  - id: github_user_events
+    type: github
+    enabled: true
+    profile: both
+    config:
+      type: user_events
+      usernames:
+        - torvalds
+        - karpathy
+        - simonw
+        - jxnl
+        - ansem
+      event_types:
+        - PushEvent
+        - CreateEvent
+        - ReleaseEvent
+        - PublicEvent
+        - WatchEvent
+
+  - id: github_repo_releases
+    type: github
+    enabled: true
+    profile: both
+    config:
+      type: repo_releases
+      repos:
+        - owner: pydantic
+          repo: pydantic
+        - owner: anthropics
+          repo: claude-code
+        - owner: langchain-ai
+          repo: langchain
+        - owner: crewAIInc
+          repo: crewAI
+        - owner: microsoft
+          repo: autogen
+
+  # === HACKER NEWS ===
+  - id: hackernews
+    type: hackernews
+    enabled: true
+    profile: both
+    config:
+      fetch_top_stories: 30
+      min_score: 100
+      top_comments_limit: 5
+
+  # === ARXIV ===
+  - id: arxiv_cs_ai
+    type: arxiv
+    enabled: true
+    profile: both
+    config:
+      query: "cat:cs.AI OR cat:cs.LG OR cat:cs.CL"
+      max_results: 50
+      sort_by: submittedDate
+      sort_order: descending
+
+  # === HUGGING FACE HUB ===
+  - id: hf_hub_trending
+    type: hf_hub
+    enabled: true
+    profile: both
+    config:
+      sort: downloads
+      limit: 30
+      filter:
+        - transformers
+        - llm
+        - agent
+        - rag
+
+  # === RSS FEEDS ===
+  - id: rss_simon_willison
+    type: rss
+    enabled: true
+    profile: ai-tools
+    config:
+      name: "Simon Willison"
+      url: "https://simonwillison.net/atom/everything/"
+      category: "ai-tools"
+      content_extractor: "trafilatura"
+
+  - id: rss_vllm_blog
+    type: rss
+    enabled: true
+    profile: agent-engineering
+    config:
+      name: "vLLM Blog"
+      url: "https://vllm.ai/blog/rss.xml"
+      category: "llm-inference"
+      content_extractor: "trafilatura"
+
+  - id: rss_seangoedecke
+    type: rss
+    enabled: true
+    profile: agent-engineering
+    config:
+      name: "Sean Goedecke"
+      url: "https://www.seangoedecke.com/rss.xml"
+      category: "software-engineering"
+      content_extractor: "trafilatura"
+
+  - id: rss_nvidia_cuda
+    type: rss
+    enabled: true
+    profile: agent-engineering
+    config:
+      name: "NVIDIA CUDA Technical Blog"
+      url: "https://developer.nvidia.com/blog/tag/cuda/feed/"
+      category: "cuda"
+      content_extractor: "trafilatura"
+
+  - id: rss_langchain
+    type: rss
+    enabled: true
+    profile: agent-engineering
+    config:
+      name: "LangChain Blog"
+      url: "https://blog.langchain.dev/rss/"
+      category: "agent-framework"
+      content_extractor: "trafilatura"
+
+  - id: rss_crewai
+    type: rss
+    enabled: true
+    profile: agent-engineering
+    config:
+      name: "CrewAI Blog"
+      url: "https://blog.crewai.com/rss/"
+      category: "agent-framework"
+      content_extractor: "trafilatura"
+
+  - id: rss_anthropic
+    type: rss
+    enabled: true
+    profile: both
+    config:
+      name: "Anthropic News"
+      url: "https://www.anthropic.com/news/rss.xml"
+      category: "ai-research"
+      content_extractor: "trafilatura"
+
+  # === HORIZON (Optional - RSS-only mode) ===
+  - id: horizon_rss
+    type: horizon
+    enabled: true
+    profile: both
+    config:
+      # Uses Horizon's RSS scraper directly
+      # Requires Horizon installed in environment
+      profiles:
+        - tech-news
+        - tech-blog
+      sources:
+        rss:
+          - name: "Simon Willison"
+            url: "https://simonwillison.net/atom/everything/"
+            enabled: true
+            category: "ai-tools"
+            profile: "tech-news"
+          - name: "vLLM Blog"
+            url: "https://vllm.ai/blog/rss.xml"
+            enabled: true
+            category: "llm-inference"
+            profile: "tech-blog"
+            content_extractor: "trafilatura"
+      collection:
+        time_window_hours: 24
+
+# === DEFERRED SOURCES (require OAuth/paid) ===
+# - id: reddit
+#   type: reddit
+#   enabled: false
+#   config:
+#     subreddits: ["MachineLearning", "LocalLLaMA", "LangChain"]
+# - id: twitter
+#   type: twitter
+#   enabled: false
+#   config:
+#     users: ["karpathy", "ylecun", "simonw"]

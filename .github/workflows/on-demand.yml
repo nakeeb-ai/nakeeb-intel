@@ -1,0 +1,89 @@
+# On-Demand Pipeline
+# Manual trigger for ad-hoc runs
+
+name: On-Demand Pipeline
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Skip publishing'
+        type: boolean
+        default: true
+      since_hours:
+        description: 'Collection window (hours)'
+        type: string
+        default: '24'
+      profile:
+        description: 'Domain profile'
+        type: choice
+        options: [ai-tools, agent-engineering, both]
+        default: 'both'
+      max_items:
+        description: 'Max items per source'
+        type: string
+        default: '50'
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: event-log
+  cancel-in-progress: false
+
+jobs:
+  on-demand:
+    name: On-Demand Run
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+      HF_API_KEY: ${{ secrets.HF_API_KEY }}
+      GH_PAT_DISPATCH: ${{ secrets.GH_PAT_DISPATCH }}
+      BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+      ADMIN_USER_ID: ${{ secrets.ADMIN_USER_ID }}
+      LOG_LEVEL: INFO
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GH_PAT_DISPATCH }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run pipeline
+        run: |
+          python -m src.cli run \
+            --dry-run ${{ github.event.inputs.dry_run }} \
+            --since-hours ${{ github.event.inputs.since_hours }} \
+            --profile ${{ github.event.inputs.profile }} \
+            --max-items ${{ github.event.inputs.max_items }}
+
+      - name: Verify database rebuild
+        run: |
+          python -m src.rebuild_db
+
+      - name: Commit and push events
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if ! git diff --quiet index/events.jsonl; then
+            git add index/events.jsonl
+            git commit -m "chore: update events.jsonl (on-demand) [skip ci]"
+            git push
+          else
+            echo "No changes to commit"
+          fi

@@ -1,0 +1,167 @@
+# Nakeeb AI - Domain Profile: AI Agent Engineering
+# Domain 2: Agent architectures, orchestration, memory, tools, evaluation
+
+id: agent-engineering
+name: "AI Agent Engineering"
+description: "Agent architectures, multi-agent orchestration, workflow engines, agent memory systems, tool integration frameworks, evaluation/observability, agent development practices"
+
+# Source filtering
+sources:
+  include:
+    - github_user_events
+    - github_repo_releases
+    - hackernews
+    - arxiv_cs_ai
+    - hf_hub_trending
+    - rss_vllm_blog
+    - rss_seangoedecke
+    - rss_langchain
+    - rss_crewai
+    - rss_anthropic
+    - horizon_rss
+  exclude: []
+
+# Keywords for relevance matching
+keywords:
+  required_any:
+    - agent
+    - multi-agent
+    - orchestration
+    - workflow
+    - memory
+    - context
+    - tool use
+    - function calling
+    - mcp
+    - model context protocol
+    - planning
+    - reasoning
+    - chain of thought
+    - tree of thought
+    - graph of thought
+    - reflexion
+    - self-reflection
+    - evaluation
+    - benchmark
+    - observability
+    - tracing
+    - debugging
+    - langchain
+    - langgraph
+    - crewai
+    - autogen
+    - crew
+    - swarm
+    - hivemind
+    - meta-agents
+    - hierarchical agents
+    - agent framework
+    - agent platform
+    - agent runtime
+    - agent os
+    - agent sdk
+    - tool integration
+    - plugin system
+    - skill
+    - capability
+    - delegation
+    - handoff
+    - supervision
+    - human-in-the-loop
+    - hitl
+    - guardrails
+    - safety
+    - alignment
+    - prompt engineering
+    - few-shot
+    - zero-shot
+    - in-context learning
+    - rag agent
+    - retrieval agent
+    - coding agent
+    - research agent
+    - browsing agent
+    - web agent
+    - computer use
+    - browser automation
+    - playwright agent
+    - selenium agent
+    - api agent
+    - database agent
+    - sql agent
+    - spreadsheet agent
+
+  negative:
+    - malware
+    - exploit
+    - vulnerability
+    - crack
+    - keygen
+    - pirate
+    - warez
+    - illegal
+    - stolen
+    - leaked
+    - chatbot
+    - simple wrapper
+    - thin wrapper
+
+# Scoring weights (adjusts base rubric)
+scoring_weights:
+  practical_usefulness: 1.1
+  technical_quality: 1.2
+  free_access: 1.2
+  documentation: 1.1
+  maintenance: 1.0
+  integration_potential: 1.3
+  originality: 1.1
+
+# Minimum thresholds
+thresholds:
+  min_score: 65
+  reverse_engineering_threshold: 80
+  min_stars: 30
+  min_forks: 5
+  max_age_days: 730  # 2 years since last commit
+
+# License preferences
+license:
+  preferred:
+    - MIT
+    - Apache-2.0
+    - BSD-3-Clause
+    - BSD-2-Clause
+    - ISC
+    - MPL-2.0
+  acceptable:
+    - LGPL-2.1
+    - LGPL-3.0
+    - EPL-2.0
+  reject:
+    - GPL-3.0-only
+    - AGPL-3.0-only
+    - SSPL
+    - BUSL
+    - proprietary
+
+# Free-tier compatibility requirements
+free_tier:
+  required: true
+  acceptable_patterns:
+    - "free tier"
+    - "free for personal use"
+    - "open source"
+    - "community edition"
+    - "no credit card"
+    - "generous free tier"
+    - "local-first"
+    - "self-hosted"
+    - "runs locally"
+  reject_patterns:
+    - "enterprise only"
+    - "contact sales"
+    - "paid plan required"
+    - "credit card required"
+    - "trial only"
+    - "cloud only"
+    - "managed service only"

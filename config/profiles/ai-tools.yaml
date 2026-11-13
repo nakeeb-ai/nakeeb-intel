@@ -1,0 +1,143 @@
+# Nakeeb AI - Domain Profile: Open-Source AI Tools
+# Domain 1: Public AI tools, model projects, libraries, APIs
+
+id: ai-tools
+name: "Open-Source AI Tools"
+description: "Public GitHub repos, AI tools, model projects, open-source libraries, publicly documented APIs, free-tier-compatible tools"
+
+# Source filtering
+sources:
+  include:
+    - github_user_events
+    - github_repo_releases
+    - hackernews
+    - arxiv_cs_ai
+    - hf_hub_trending
+    - rss_simon_willison
+    - rss_nvidia_cuda
+    - rss_anthropic
+    - horizon_rss
+  exclude: []
+
+# Keywords for relevance matching
+keywords:
+  required_any:
+    - ai
+    - ml
+    - machine learning
+    - llm
+    - large language model
+    - transformer
+    - neural network
+    - deep learning
+    - inference
+    - training
+    - fine-tuning
+    - quantization
+    - rag
+    - retrieval
+    - embedding
+    - vector database
+    - agent
+    - tool use
+    - function calling
+    - mcp
+    - model context protocol
+    - openai
+    - anthropic
+    - gemini
+    - llama
+    - mistral
+    - qwen
+    - gpt
+    - claude
+    - hugging face
+    - hf
+    - transformers
+    - vllm
+    - ollama
+    - llamacpp
+    - exllama
+    - gguf
+    - safetensors
+    - onnx
+    - tensorrt
+    - cuda
+    - triton
+    - pytorch
+    - jax
+    - tensorflow
+    - keras
+    - scikit-learn
+    - xgboost
+    - lightgbm
+    - catboost
+
+  # Negative filters (exclude if matches)
+  negative:
+    - malware
+    - exploit
+    - vulnerability
+    - crack
+    - keygen
+    - pirate
+    - warez
+    - illegal
+    - stolen
+    - leaked
+
+# Scoring weights (adjusts base rubric)
+scoring_weights:
+  practical_usefulness: 1.2
+  technical_quality: 1.0
+  free_access: 1.3
+  documentation: 1.0
+  maintenance: 0.9
+  integration_potential: 1.1
+  originality: 1.0
+
+# Minimum thresholds
+thresholds:
+  min_score: 65
+  reverse_engineering_threshold: 80
+  min_stars: 50
+  min_forks: 10
+  max_age_days: 730  # 2 years since last commit
+
+# License preferences
+license:
+  preferred:
+    - MIT
+    - Apache-2.0
+    - BSD-3-Clause
+    - BSD-2-Clause
+    - ISC
+    - MPL-2.0
+  acceptable:
+    - LGPL-2.1
+    - LGPL-3.0
+    - EPL-2.0
+  reject:
+    - GPL-3.0-only
+    - AGPL-3.0-only
+    - SSPL
+    - BUSL
+    - proprietary
+
+# Free-tier compatibility requirements
+free_tier:
+  required: true
+  acceptable_patterns:
+    - "free tier"
+    - "free for personal use"
+    - "open source"
+    - "community edition"
+    - "no credit card"
+    - "generous free tier"
+  reject_patterns:
+    - "enterprise only"
+    - "contact sales"
+    - "paid plan required"
+    - "credit card required"
+    - "trial only"
+    - "limited free tier"

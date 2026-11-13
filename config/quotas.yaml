@@ -1,0 +1,144 @@
+# Nakeeb AI - Quota Configuration
+# INTERNAL SAFETY CAPS — NOT PROVIDER GUARANTEES
+# Provider quotas change; these are hard limits enforced by our code.
+# Source: Phase 0 audit (2026-11-13)
+# - Gemini Decision 1 Free: 200 RPM, 50k TPM, 10k RPD
+# - OpenRouter free: dynamic, model-dependent
+# - HF Inference: ~30k/month (community)
+# - GitHub API: 5,000/hr (authenticated)
+# - Cloudflare Workers Free: 100k req/day, 10ms CPU
+
+version: 1
+
+# === GLOBAL SETTINGS ===
+global:
+  # Maximum total LLM calls per pipeline run
+  max_llm_calls_per_run: 30
+  # Maximum total tokens per pipeline run (input + output)
+  max_tokens_per_run: 100000
+  # Circuit breaker: stop all LLM calls if this many consecutive failures
+  circuit_breaker_threshold: 5
+  # Backoff base seconds (exponential: base * 2^attempt)
+  backoff_base_seconds: 2
+  # Max backoff seconds
+  max_backoff_seconds: 60
+
+# === PROVIDER-SPECIFIC ===
+providers:
+  gemini:
+    enabled: true
+    model: "gemini-decision-1"
+    # Per-run hard caps
+    per_run_cap: 20
+    max_retries: 2
+    # Daily cap (RPD from docs: 10,000)
+    daily_cap: 8000  # Leave margin
+    # Token caps
+    max_input_tokens_per_call: 32000
+    max_output_tokens_per_call: 8192
+    # Stop on quota exhaustion (don't silently fallback)
+    stop_on_quota_exhaustion: true
+    # RPM limit (from docs: 200)
+    rpm_limit: 150  # Leave margin
+    # TPM limit (from docs: 50,000)
+    tpm_limit: 40000  # Leave margin
+    # Cost tracking (free tier = $0, but track for monitoring)
+    cost_per_1k_input: 0.0
+    cost_per_1k_output: 0.0
+
+  openrouter:
+    enabled: true
+    model_selection: "dynamic"  # Uses openrouter/free router
+    # Per-run hard caps
+    per_run_cap: 10
+    max_retries: 2
+    # Daily cap (conservative)
+    daily_cap: 500
+    # Token caps
+    max_input_tokens_per_call: 32000
+    max_output_tokens_per_call: 8192
+    # Fallback behavior
+    fallback_behavior: "skip"  # skip enrichment if exhausted
+    # Must verify model is still free before each call
+    verify_free_before_call: true
+    # Cost tracking
+    cost_per_1k_input: 0.0
+    cost_per_1k_output: 0.0
+
+  hf_inference:
+    enabled: false  # Deferred - unreliable for production
+    model: "meta-llama/Llama-3.1-8B-Instruct"
+    per_run_cap: 5
+    max_retries: 1
+    daily_cap: 100
+    fallback_behavior: "skip"
+
+# === TELEGRAM ===
+telegram:
+  enabled: false  # Deferred per D-TELEGRAM-01
+  messages_per_run: 1
+  max_report_chars: 3800
+  # Rate limits (from Bot API)
+  max_messages_per_second: 1
+  max_messages_per_minute: 20
+
+# === GITHUB ACTIONS ===
+github_actions:
+  # Conservative monthly budget (minutes)
+  # Public repo: unlimited, but track for monitoring
+  monthly_minute_budget: 10000
+  # Alert threshold (percentage)
+  alert_threshold_pct: 80
+  # Per-workflow caps
+  workflows:
+    daily-radar:
+      timeout_minutes: 25
+      max_runs_per_day: 4
+    weekly-digest:
+      timeout_minutes: 15
+      max_runs_per_week: 1
+    on-demand:
+      timeout_minutes: 10
+      max_runs_per_day: 10
+
+# === GOOGLE DRIVE ===
+google_drive:
+  enabled: false  # Deferred per D-DRIVE-01
+  # Backup size caps
+  max_backup_size_mb: 500
+  # Retention
+  keep_daily: 7
+  keep_weekly: 4
+  keep_monthly: 6
+
+# === MONITORING ===
+monitoring:
+  # Log quota usage every N calls
+  log_interval_calls: 5
+  # Alert on quota exhaustion
+  alert_on_exhaustion: true
+  # Metrics to track
+  track:
+    - provider
+    - model
+    - calls
+    - input_tokens
+    - output_tokens
+    - latency_ms
+    - success
+    - error_type
+
+# === GRACEFUL DEGRADATION ===
+degradation:
+  # Priority order when providers fail
+  provider_priority:
+    - gemini
+    - openrouter
+  # If ALL providers unavailable:
+  all_unavailable:
+    action: "continue_metadata_only"
+    label: "TECHNICAL_ONLY"
+    description: "No LLM enrichment available; metadata-only scoring applied"
+  # Minimum viable run
+  min_sources_required: 2
+  min_discoveries_for_digest: 1

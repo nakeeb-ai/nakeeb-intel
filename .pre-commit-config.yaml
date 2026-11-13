@@ -1,0 +1,96 @@
+# Nakeeb AI - Pre-commit hooks
+# Install: pip install pre-commit && pre-commit install
+
+repos:
+  # === SECRET SCANNING ===
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.24.1
+    hooks:
+      - id: gitleaks
+        name: Gitleaks Secret Scan
+        entry: gitleaks detect --source . --verbose --redact
+        language: system
+        types: [text]
+        exclude: ^(\.pre-commit-config\.yaml|\.gitignore|README\.md|CHANGELOG\.md|docs/|.*\.example)$
+        verbose: true
+
+  # === PYTHON FORMATTING & LINTING ===
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.0
+    hooks:
+      - id: ruff
+        name: Ruff Lint
+        args: [--fix, --exit-non-zero-on-fix]
+        types: [python]
+      - id: ruff-format
+        name: Ruff Format
+        types: [python]
+
+  # === PYTHON TYPE CHECKING ===
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.13.0
+    hooks:
+      - id: mypy
+        name: MyPy Type Check
+        args: [--strict, --ignore-missing-imports]
+        additional_dependencies:
+          - pydantic
+          - httpx
+          - feedparser
+        types: [python]
+        exclude: ^(tests/|src/llm\.py)
+
+  # === GENERAL FILE CHECKS ===
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        name: Trim Trailing Whitespace
+      - id: end-of-file-fixer
+        name: Ensure Ending Newline
+      - id: check-yaml
+        name: Check YAML Syntax
+        args: [--unsafe]
+      - id: check-json
+        name: Check JSON Syntax
+      - id: check-toml
+        name: Check TOML Syntax
+      - id: check-merge-conflict
+        name: Check Merge Conflicts
+      - id: detect-private-key
+        name: Detect Private Keys
+      - id: forbid-new-submodules
+        name: Forbid Submodules
+
+  # === MARKDOWN LINTING ===
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.44.0
+    hooks:
+      - id: markdownlint
+        name: Markdown Lint
+        args: [--config, .markdownlint.json]
+        types: [markdown]
+
+  # === SHELL SCRIPT CHECKS ===
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.10.0.1
+    hooks:
+      - id: shellcheck
+        name: ShellCheck
+        types: [shell]
+
+  # === PYTHON TESTS (run on commit) ===
+  - repo: local
+    hooks:
+      - id: pytest-unit
+        name: Unit Tests (Fast)
+        entry: python -m pytest tests/ -x -q --tb=short -k "not integration"
+        language: system
+        types: [python]
+        pass_filenames: false
+        stages: [commit]
+        verbose: true
+
+# === CONFIGURATION ===
+default_stages: [commit]
+fail_fast: true

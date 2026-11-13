@@ -1,0 +1,89 @@
+# Nakeeb AI - Opportunity Intelligence v2.1
+# .gitignore - Strict secret and artifact exclusion
+
+# === SECRETS & CREDENTIALS (NEVER COMMIT) ===
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+rclone.conf
+*.secret
+*.token
+
+# === DATABASE & LOCAL STATE ===
+index/discoveries.db
+index/*.db
+index/*.db-journal
+*.sqlite
+*.sqlite3
+
+# === PRIVATE REPORTS ===
+reports/private/
+reports/*private*
+reports/*internal*
+*.private.md
+
+# === PYTHON ===
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+.pip/
+pip-wheel-metadata/
+
+# === NODE ===
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-store/
+
+# === IDE/EDITOR ===
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# === LOGS (may contain sensitive data) ===
+logs/
+*.log
+*.log.*
+
+# === TEST ARTIFACTS ===
+tests/__pycache__/
+tests/fixtures/*.jsonl
+tests/fixtures/*.db
+.coverage.*
+
+# === LINTER CACHES ===
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+
+# === TEMPORARY ===
+tmp/
+temp/
+*.tmp
+*.bak
+
+# === RCLONE ===
+rclone.conf
+rclone.conf.*
+
+# === BUILD ARTIFACTS ===
+*.zip
+*.tar.gz
+*.whl
