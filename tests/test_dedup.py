@@ -7,8 +7,10 @@ Tests for deduplication, scoring, quota, event sourcing, and security.
 import pytest
 import tempfile
 import hashlib
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any, Optional, List, Dict
 
 from src.intake import (
     canonicalize_url,
@@ -16,9 +18,8 @@ from src.intake import (
     generate_fingerprint,
     generate_stable_id,
     Discovery,
-    Deduplicator,
 )
-from src.enrich import EnrichedDiscovery
+from src.dedup import Deduplicator
 from src.score import Scorer, ScoreBreakdown, BASE_RUBRIC, TIER_THRESHOLDS
 from src.index import EventStore, DiscoveryIndex, Event, SCHEMA_SQL
 from src.quota import QuotaManager, ProviderQuota
@@ -37,6 +38,34 @@ from src.errors import (
     SecurityError,
     ConcurrencyError,
 )
+
+
+# Mock EnrichedDiscovery for scoring tests (Phase 3 functionality)
+@dataclass
+class EnrichedDiscovery:
+    """Mock enriched discovery for testing."""
+    discovery: Discovery
+    name: str = ""
+    description: str = ""
+    repo_url: str = ""
+    owner: str = ""
+    license: str = ""
+    stars: int = 0
+    forks: int = 0
+    last_commit: str = ""
+    releases: List[Dict] = field(default_factory=list)
+    dependencies: List[str] = field(default_factory=list)
+    install_requirements: str = ""
+    api_pricing: str = ""
+    hosting_requirements: str = ""
+    hardware_requirements: str = ""
+    free_tier_compatibility: str = ""
+    security_notes: str = ""
+    provenance: Dict[str, str] = field(default_factory=dict)
+    confidence: Dict[str, float] = field(default_factory=dict)
+    missing_info: List[str] = field(default_factory=list)
+    enrichment_errors: List[str] = field(default_factory=list)
+    flags: List[str] = field(default_factory=list)
 
 
 # === FIXTURES ===
@@ -245,7 +274,6 @@ class TestScorer:
         scorer = Scorer(profile_path, "test")
 
         # Create minimal enriched discovery
-        from src.intake import Discovery, canonicalize_url, normalize_title
         disc = Discovery.from_source(
             url="https://github.com/test/repo",
             title="Test Repo",
@@ -281,7 +309,6 @@ class TestScorer:
         scorer = Scorer(profile_path, "test")
 
         # Low score -> reject
-        from src.intake import Discovery
         disc = Discovery.from_source("https://x.com", "X", "x", "x")
         enriched = EnrichedDiscovery(discovery=disc)
         enriched.description = "x"
@@ -291,7 +318,6 @@ class TestScorer:
     def test_deterministic(self, profile_path):
         """Same input + config = same score."""
         scorer = Scorer(profile_path, "test")
-        from src.intake import Discovery
         disc = Discovery.from_source("https://github.com/test/repo", "Test", "github", "https://api.github.com")
         enriched = EnrichedDiscovery(discovery=disc)
         enriched.name = "Test"
@@ -624,8 +650,8 @@ class TestIntegration:
     @pytest.mark.asyncio
     async def test_full_pipeline_mock(self, temp_dir, profile_path):
         """Test the full pipeline with mock data."""
-        from src.intake import Discovery, process_source_batch, Deduplicator
-        from src.enrich import enrich_batch
+        from src.intake import Discovery
+        from src.dedup import process_source_batch, Deduplicator
         from src.score import score_batch
 
         # Mock source data
@@ -639,9 +665,6 @@ class TestIntegration:
 
         assert len(new_discs) == 2
         assert len(dup_info) == 0
-
-        # Enrich (mock - no actual API calls)
-        # In real test, would mock httpx responses
 
         # Score
         scored = await score_batch([

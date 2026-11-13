@@ -13,7 +13,6 @@ from pathlib import Path
 
 import yaml
 
-from .enrich import EnrichedDiscovery
 from .errors import ScoringError, ConfigurationError
 
 
@@ -73,7 +72,7 @@ class ScoreBreakdown:
 @dataclass
 class ScoredDiscovery:
     """Discovery with deterministic score."""
-    enriched: EnrichedDiscovery
+    enriched: Any  # EnrichedDiscovery (defined in Phase 3)
     scores: ScoreBreakdown
     total: int
     tier: str  # reject, standard, reverse_engineer
@@ -142,11 +141,10 @@ class Scorer:
         }, sort_keys=True)
         return hashlib.sha256(config_str.encode()).hexdigest()[:16]
 
-    def score(self, enriched: EnrichedDiscovery) -> ScoredDiscovery:
+    def score(self, enriched: Any) -> ScoredDiscovery:
         """Score an enriched discovery deterministically."""
         e = enriched
         d = e.discovery
-        meta = e.__dict__  # Access enriched fields
 
         # --- Practical Usefulness (0-20) ---
         usefulness, u_reason, u_prov = self._score_usefulness(e)
@@ -236,7 +234,7 @@ class Scorer:
 
     # --- Scoring Methods ---
 
-    def _score_usefulness(self, e: EnrichedDiscovery) -> tuple[int, str, str]:
+    def _score_usefulness(self, e: Any) -> tuple[int, str, str]:
         """Score practical usefulness (0-20)."""
         desc = (e.description or "").lower()
         name = (e.name or "").lower()
@@ -274,7 +272,7 @@ class Scorer:
 
         return max(0, min(20, int(score))), f"Utility keywords: {util_count}, stars: {e.stars}", "metadata"
 
-    def _score_quality(self, e: EnrichedDiscovery) -> tuple[int, str, str]:
+    def _score_quality(self, e: Any) -> tuple[int, str, str]:
         """Score technical quality (0-20)."""
         # Indicators: tests, CI, typing, docs, structure
         deps = e.dependencies
@@ -303,7 +301,7 @@ class Scorer:
 
         return max(0, min(20, int(score))), f"Quality deps: {sum(1 for d in deps if any(q in d.lower() for q in ['pytest','ruff','mypy','black']))}, README signals", "metadata"
 
-    def _score_free_access(self, e: EnrichedDiscovery) -> tuple[int, str, str]:
+    def _score_free_access(self, e: Any) -> tuple[int, str, str]:
         """Score free/low-cost access (0-15)."""
         free_text = (e.free_tier_compatibility or "").lower()
         pricing = (e.api_pricing or "").lower()
@@ -346,7 +344,7 @@ class Scorer:
 
         return max(0, min(15, int(score))), f"Free signals: {sum(1 for p in positive if p in combined)}, license: {e.license}", "metadata"
 
-    def _score_documentation(self, e: EnrichedDiscovery) -> tuple[int, str, str]:
+    def _score_documentation(self, e: Any) -> tuple[int, str, str]:
         """Score documentation (0-15)."""
         readme = (e.install_requirements or "").lower()
         desc_len = len(e.description or "")
@@ -373,7 +371,7 @@ class Scorer:
 
         return max(0, min(15, int(score))), f"Desc len: {desc_len}, README sections: {sum(1 for s in sections if s in readme)}", "metadata"
 
-    def _score_maintenance(self, e: EnrichedDiscovery) -> tuple[int, str, str]:
+    def _score_maintenance(self, e: Any) -> tuple[int, str, str]:
         """Score maintenance activity (0-10)."""
         from datetime import datetime, timezone
 
@@ -408,7 +406,7 @@ class Scorer:
 
         return max(0, min(10, int(score))), f"Last commit: {e.last_commit}, releases: {len(e.releases)}", "metadata"
 
-    def _score_integration(self, e: EnrichedDiscovery) -> tuple[int, str, str]:
+    def _score_integration(self, e: Any) -> tuple[int, str, str]:
         """Score integration potential (0-10)."""
         readme = (e.install_requirements or "").lower()
         deps = [d.lower() for d in e.dependencies]
@@ -444,7 +442,7 @@ class Scorer:
 
         return max(0, min(10, int(score))), f"API signals in README, dependencies", "metadata"
 
-    def _score_originality(self, e: EnrichedDiscovery) -> tuple[int, str, str]:
+    def _score_originality(self, e: Any) -> tuple[int, str, str]:
         """Score originality/opportunity (0-10)."""
         desc = (e.description or "").lower()
         name = (e.name or "").lower()
@@ -484,7 +482,7 @@ class Scorer:
 
 
 async def score_batch(
-    enriched: list[EnrichedDiscovery],
+    enriched: list[Any],
     profile_path: Path,
     domain: str,
 ) -> list[ScoredDiscovery]:

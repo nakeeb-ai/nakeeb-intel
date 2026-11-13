@@ -19,7 +19,6 @@ from uuid import uuid4
 
 from .errors import EventStoreError, ConcurrencyError
 from .intake import Discovery
-from .enrich import EnrichedDiscovery
 from .score import ScoredDiscovery
 
 
