@@ -48,6 +48,8 @@ class EnrichedDiscovery:
     missing_info: list[str] = field(default_factory=list)
     # Enrichment errors
     enrichment_errors: list[str] = field(default_factory=list)
+    # Flags for scoring
+    flags: list[str] = field(default_factory=list)
 
 
 class Enricher:

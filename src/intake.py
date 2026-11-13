@@ -56,7 +56,7 @@ def canonicalize_url(url: str) -> CanonicalURL:
     Canonicalize URL per Horizon's _deduplication_url_key:
     - Lowercase scheme and host
     - Remove default ports (80/443)
-    - Normalize path (remove trailing slash except root)
+    - Normalize path (remove trailing slash except root, lowercase)
     - Strip tracking query parameters
     - Sort remaining query parameters
     """
@@ -70,8 +70,9 @@ def canonicalize_url(url: str) -> CanonicalURL:
     if (scheme == "http" and port == 80) or (scheme == "https" and port == 443):
         port = None
 
-    # Normalize path
-    path = parsed.path.rstrip("/") or "/"
+    # Normalize path (lowercase)
+    path = re.sub(r"/+", "/", parsed.path).rstrip("/") or "/"
+    path = path.lower()
 
     # Process query parameters
     query_params = parse_qs(parsed.query, keep_blank_values=True)
@@ -92,8 +93,10 @@ def normalize_title(title: str) -> str:
     """Normalize title for fingerprinting."""
     # Lowercase, strip, collapse whitespace
     normalized = re.sub(r"\s+", " ", title.strip().lower())
-    # Remove common punctuation that doesn't affect meaning
-    normalized = re.sub(r"[^\w\s\-]", "", normalized)
+    # Remove common punctuation that doesn't affect meaning (keep alphanumeric and spaces)
+    normalized = re.sub(r"[^\w\s]", "", normalized)
+    # Collapse multiple spaces
+    normalized = re.sub(r"\s+", " ", normalized).strip()
     return normalized
 
 

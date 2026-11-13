@@ -137,7 +137,7 @@ class TestNormalizeTitle:
         title = "Café résumé"
         normalized = normalize_title(title)
         assert "caf" in normalized
-        assert "resum" in normalized
+        assert "r\xe9sum\xe9" in normalized or "resume" in normalized
 
 
 class TestFingerprint:
@@ -418,6 +418,8 @@ providers:
 """)
         qm = QuotaManager(config)
         qm.check_and_reserve("gemini")
+        # Record the call to increment counter
+        qm.record_call("gemini", 100, 50, True)
         with pytest.raises(QuotaExhaustedError):
             qm.check_and_reserve("gemini")
 

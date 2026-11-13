@@ -11,7 +11,7 @@ import sqlite3
 import hashlib
 import threading
 from contextlib import contextmanager
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, field, asdict
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Optional, Iterator
@@ -283,6 +283,17 @@ class DiscoveryIndex:
         for event in event_store.read_all():
             self._apply_event(event)
             counts["events"] += 1
+            # Increment specific table counters
+            if event.event_type == "discovery_created":
+                counts["discoveries"] += 1
+            elif event.event_type == "enriched":
+                counts["enrichments"] += 1
+            elif event.event_type == "scored":
+                counts["scores"] += 1
+            elif event.event_type == "brief_generated":
+                counts["briefs"] += 1
+            elif event.event_type in ("run_started", "run_completed"):
+                counts["runs"] += 1
 
         self._conn.commit()
         return counts

@@ -64,6 +64,11 @@ class ProviderQuota:
         if self.circuit_open:
             return False, f"Circuit breaker open for {self.provider}"
 
+        # Check if consecutive failures should open circuit
+        if self.consecutive_failures >= 5:
+            self.circuit_open = True
+            return False, f"Circuit breaker open for {self.provider} (5 consecutive failures)"
+
         if self.calls_this_run >= self.per_run_cap:
             return False, f"Per-run cap reached ({self.per_run_cap})"
 
